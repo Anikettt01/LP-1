@@ -1,0 +1,19 @@
+START	
+ADD     AREG, X
+MACRO
+TE1	    &T, &E=
+READ	&T
+SUB	    &E, &T
+MEND
+MACRO	 
+PICT    &P, &I, &C=, &T=DREG
+ADD     &T, &P
+MOVEM	&T, &I
+PRINT	&C
+MEND
+X       DS 10
+TE1	    X, &E=AREG
+PICT	X, Y, &C=Z
+Y       DS 1
+Z       DS 1
+END

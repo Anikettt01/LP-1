@@ -1,0 +1,7 @@
+READ	(P,0)	
+SUB	(P,1)	(P,0)	
+MEND
+ADD	(P,3)	(P,0)	
+MOVEM	(P,3)	(P,1)	
+PRINT	(P,2)	
+MEND

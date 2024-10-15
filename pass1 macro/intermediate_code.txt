@@ -1,0 +1,8 @@
+START	
+ADD     AREG, X
+X       DS 10
+TE1	    X, &E=AREG
+PICT	X, Y, &C=Z
+Y       DS 1
+Z       DS 1
+END
