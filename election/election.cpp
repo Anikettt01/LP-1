@@ -1,145 +1,151 @@
-#include<iostream>
-#include<algorithm>
-#include<vector>
+#include<bits/stdc++.h>
+#include<unistd.h>
 using namespace std;
 
-class Process {
+class candidates{
     public:
-    int id;
-    string pname;
+        int id;
+        bool active;
 
-    Process () {
-        id = 0;
-        pname = "";
-    } 
+        candidates(){
+            id = 0;
+            active = true;
+        }
 
-    friend class Election;
+        void addCandidates(){
+            cout<<"Enter the id of new Candidates: ";
+            cin>>id;
+        }
 };
 
-class Election {
-    Process *p;
-    int *flag;
-    int num;
-
-    int highest(Process p[]) {
-        int pos = 0, max = 0;
-        for(int i=0;i<num;i++) {
-            if(p[i].id > max) {
-                max = p[i].id;
-                pos = i;
-            }
-        }
-        return pos;
-    }
-
-    int find_position(int id) {
-        for(int i=0;i<num;i++) {
-            if(p[i].id == id)
-                return i;
-        }
-        return 0;
-    }
-
+class election{
     public:
+    vector<candidates>v;
+    int currIndex;
 
-    void input() { 
-        cout<<"Enter number of processes: ";
-        cin>>num;
-
-        p = new Process[num];
-        flag = new int[num];
-
-        for(int i=0;i<num;i++) {
-            cout<<"Enter process name: ";
-            cin>>p[i].pname;
-            cout<<"Enter process id: ";
-            cin>>p[i].id;
-        }
-
-        int pos = highest(p);
-        cout<<"Process named "<<p[pos].pname<<" has crashed. ID: "<<p[pos].id<<endl;
+    void getCandidates(){
+        candidates c;
+        c.addCandidates();
+        v.push_back(c);
     }
 
-    Process bully (Process coordinator) {
-        for(int i=0;i<num;i++)
-            flag[i] = 0;
-
-        int crashed = highest(p);
-        flag[crashed] = 1;
-
-        for(int i=0;i<num;i++) {
-            if(p[i].id > coordinator.id) 
-                cout<<"Election message sent from Process (coordinator) "<<coordinator.id<<" to Process "<<p[i].id<<endl;
-            else flag[i] = 1;
-        }
-
-        for(int i=0;i<num;i++) {
-            if(flag[i] != 1 && p[i].id > coordinator.id) {
-                cout<<"The process "<<p[i].id<<" takes over from the current coordinator "<<coordinator.id<<endl;
-                flag[coordinator.id] = 1;
-                coordinator = p[i];
+    // first find max id and its index simply print current co-ordinate then it will fail which will be detected by some index then
+    // deactivate currIndex and then print election initialized
+    void addFailure(){
+        int max=0;
+        // max logic
+        for(int i=0;i<v.size();i++){
+            if(v[i].id > max && v[i].active){
+                max = v[i].id;
+                currIndex = i;
             }
         }
-
-        for(int i=0;i<num;i++) {
-            if(flag[i] == 0) 
-                coordinator = bully(coordinator);
-        }
-
-        return coordinator;
+        cout<<"Current co-ordinate is: "<<v[currIndex].id<<endl;
+        sleep(2);
+        cout<<"Current co-ordinate failed";
+        cout<<"Detected by: "<<v[(currIndex-1+v.size())%v.size()].id<<endl;
+        v[currIndex].active = false;
+        sleep(2);
+        cout<<"Election Initialized"<<endl;
     }
 
-    void ring (Process coordinator) {
-        vector<int> vec;
-        int crashed = highest(p);
-        int pos = find_position(coordinator.id);
-        int count = 0, i = pos;
-        while(count < num ) {
-            if(i != crashed) 
-                vec.push_back(p[i].id);
-            i = (i+1)% num;
-            count++;
+    // Ring algorithm
+    // first store the current in old  then create new i.e previous node run a while loop until new and old becomes same increment by one 
+    // and simply print that message pass from and print current new id after the loop again find the maximum simply copy paste from addFailure
+    void ringAlgorithm(){
+        int old = currIndex;
+        int new1 = (old-1+v.size())%v.size();
+        while(new1!=old){
+            int next = (new1+1)%v.size();
+            if(v[next].active){
+                sleep(2);
+                cout<<"message passed from "<<v[new1].id<<"to "<<v[next].id<<endl;
+            }
+            new1 = next;
         }
-        vector<int>::iterator it;
+        int max=0;
+        // max logic
+        for(int i=0;i<v.size();i++){
+            if(v[i].id > max && v[i].active){
+                max = v[i].id;
+                currIndex = i;
+            }
+        }
+        cout<<"New co-ordinate is: "<<v[currIndex].id<<endl;
+    }
 
-        cout<<"Message is [";
-        for(int i=0;i<count;i++) {
-            cout<<vec[i]<<" ";
+    // find max elements same from addFailure print current elements then find next element to that kind of same to addFailture
+    // keep one flag false add a loop if [i] element is active and its id is greater than current then pass the message to new id
+    // make flag true after the loop if flag is false then print current id
+    void bullyAlgorithm(){
+        int max=0;
+        for(int i=0;i<v.size();i++){
+            if(v[i].active && v[i].id > max){
+                currIndex = i;
+                max = v[i].id;
+            }
         }
-        cout<<"]"<<endl;
-        int coord_id = *max_element(vec.begin(), vec.end());
-        int final_coord_pos = find_position(coord_id);
-        cout<<"Final coordinator is: "<<p[final_coord_pos].pname<<endl;
+        cout<<"Current co-ordinate is: "<<v[currIndex].id<<endl;
+        sleep(2);
+        cout<<"Current co-ordinate failed"<<endl;
+
+        int new1 = (currIndex-1+v.size())%v.size();
+        cout<<"Detected by "<<v[new1].id<<endl;
+        v[currIndex].active = false;
+        sleep(2);
+        cout<<"Election initialized"<<endl;
+
+        bool foundCordinate = false;
+        for(int i=new1 ; i != currIndex ; i = (i+1)%v.size()){
+            if(v[i].active && v[i].id > v[currIndex].id){
+                currIndex = i;
+                foundCordinate = true;
+                break;
+            }
+        }
+        if(!foundCordinate){
+            cout<<"co-ordinate is: "<<v[currIndex].id<<endl;
+        }
     }
 };
 
-int main() {
-    Election e;
-    e.input();
-    Process i_coord;
-    Process f_coord;
+int main(){
+    election e;
+    bool loop = true;
 
-    cout << "Enter the name process which detects that the coordinator has crashed: ";
-    cin >> i_coord.pname;
-    cout << "Enter the id process which detects that the coordinator has crashed: ";
-    cin >> i_coord.id;
+    while(loop){
+        int n;
+        cout<<"enter the number of candidates: ";
+        cin>>n;
+        for(int i=0;i<n;i++){
+            e.getCandidates();
+        }
+        cout<<"choose one election algorithm"<<endl;
+        cout<<"1.Ring algorithm"<<endl;
+        cout<<"2.Bully algorithm"<<endl;
+        cout<<"3.exit"<<endl;
 
-    int ch = 0;
-    while(ch != 3) {
-        cout << "MENU" << endl;
-        cout << "1.Bully algorithm\n2.Ring algorithm\n3.Exit\n";
-        cout << "Enter your choice: ";
-        cin >> ch;
-        switch (ch)
-        {
-        case 1:
-            f_coord = e.bully(i_coord);
-            cout << "The final coordinator is: " << f_coord.pname << endl;
+        int choice;
+        cin>>choice;
+        
+        switch(choice){
+            case 1:
+            e.addFailure();
+            e.ringAlgorithm();
             break;
-        case 2:
-            e.ring(i_coord);
+
+            case 2:
+            e.addFailure();
+            e.bullyAlgorithm();
+            break;
+
+            case 3:
+            loop  = false;
+            break;
+
+            default:
+            cout<<"Invalid choice"<<endl;
         }
     }
-
     return 0;
 }
