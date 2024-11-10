@@ -1,140 +1,190 @@
-#include<iostream>
-#include<map>
-#include<iomanip>
-#include<algorithm>
+#include<bits/stdc++.h>
 using namespace std;
-class Memory{
-    int *blocks;
-    int *process;
-    int *flag;
-    int bsize;
-    int psize;
 
+class memoryManagement{
     public:
-        Memory(){
-            bsize=0;
-            psize=0;
+        // vector having pair to store status and size of memory block
+        vector<pair<string,int>>mainMemory;
+        int nextLocation;
+        // constructor
+        // take input of number of blocks and sizes of each block and add in vector
+        memoryManagement(){
+            int num,size;
+            cout<<"Enter number of blocks: ";
+            cin>>num;
+            for(int i=0;i<num;i++){
+                cout<<"Enter size of block "<<i+1<<": ";
+                cin>>size;
+                mainMemory.push_back(make_pair("Free",size));
+            }
+            nextLocation = -1;
         }
-    void input();
-    void firstfit();
-    void bestfit();
-    void worstfit();
-    //void intial_wastage();
 
+        // firstFit
+        // take input for process name and process size simply check if block is free and its size is greater than or equal to processize insert it
+        void firstFit(){
+            string processName;
+            int processSize;
+            cout<<"Enter process name: ";
+            cin>>processName;
+            cout<<"Enter process size: ";
+            cin>>processSize;
+            bool allocated = false;
+
+            for(size_t i=0;i<mainMemory.size();i++){
+                if(mainMemory[i].first == "Free" && mainMemory[i].second >= processSize){
+                    mainMemory[i].first = processName;
+                      allocated = true;
+                    break;
+                }
+            }
+            if (!allocated) {
+                cout << "Not enough memory to allocate " << processName << endl;
+            }
+        }
+
+        // take input for process name and size keep two variables to keep track on bestSize and bestIndex
+        // run a loop on memory vector and check if block is free and size is available then check for if its less than bestsize then simply
+        // change bestsize and bestlocation according to this block then if betslocation != -1 then add processname to that black else add 
+        // no memory block available 
+        void bestFit(){
+            string processName;
+            int processSize;
+            cout<<"Enter process name: ";
+            cin>>processName;
+            cout<<"Enter process size: ";
+            cin>>processSize;
+
+            int bestSize = INT_MAX;
+            int bestLocation = -1;
+             bool allocated = false;
+            for(size_t i=0;i<mainMemory.size();i++){
+                if(mainMemory[i].first=="Free" && mainMemory[i].second >= processSize){
+                    if(mainMemory[i].second < bestSize){
+                        bestSize = mainMemory[i].second;
+                        bestLocation=i;
+                    }
+                }
+            }
+            if(bestLocation != -1) {
+                mainMemory[bestLocation].first = processName;
+                allocated = true;
+            }
+            if (!allocated) {
+                cout << "Memory not available for " << processName << endl;
+            }
+        }
+
+        // same as bestfit just there we are checking for less memory size here check for more memory size
+        void worstFit(){
+            string processName;
+            int processSize;
+            cout<<"Enter process name: ";
+            cin>>processName;
+            cout<<"Enter process size: ";
+            cin>>processSize;
+            bool allocated = false;
+            
+            int worstSize=0;
+            int worstLocation = -1;
+            for(size_t i=0;i<mainMemory.size();i++){
+                if(mainMemory[i].first=="Free" && mainMemory[i].second >= processSize){
+                    if(mainMemory[i].second > worstSize){
+                        worstSize = mainMemory[i].second;
+                        worstLocation=i;
+                    }
+                }
+            }
+            if (worstLocation != -1) {
+                mainMemory[worstLocation].first = processName;
+                allocated = true;
+            }
+
+            if (!allocated) {
+                cout << "Memory not available for " << processName << endl;
+            }
+        }
+
+        // take input for processname and processsize 
+        // // find next location
+        // if block is free and have greater size than processSize add it and update nexrlocation if memoryblock not present then not enough memory
+        void nextFit() {
+            string processName;
+            int processSize;
+            cout << "Enter process name: ";
+            cin >> processName;
+            cout << "Enter process size: ";
+            cin >> processSize;
+
+            int i = (nextLocation + 1) % mainMemory.size();
+            bool allocated = false;
+            while (i != nextLocation) {
+                if (mainMemory[i].first == "Free" && mainMemory[i].second >= processSize) {
+                    mainMemory[i].first = processName;
+                    nextLocation = i;
+                    allocated = true;
+                    return;
+                }
+                i = (i + 1) % mainMemory.size();
+            }
+
+            if (!allocated) {
+                cout << "Not enough memory for " << processName << endl;
+            }
+        }
+
+        void viewMemory(){
+            int i=0;
+            for(auto it:mainMemory){
+                cout<<i++<<" "<<it.first<<" "<<it.second<<endl;
+            }
+        }  
 };
-void Memory::input(){
-    cout<<"Enter the number of blocks present\n"<<endl;
-    cin>>bsize;
-    cout<<"Enter the number of processes\n"<<endl;
-    cin>>psize;
-    blocks=new int[bsize];
-    process=new int[psize];
-    flag=new int[bsize];
-    cout<<"Enter the size of the block: "<<endl;
-    for(int i=0;i<bsize;i++){
-        cin>>blocks[i];
 
-    }
-    cout<<"Enter the size of the process: "<<endl;
-    for(int i=0;i<psize;i++){
-        cin>>process[i];
+int main() {
+    memoryManagement obj;
 
-    }
+    while (true) {
+        cout << "\nSelect allocation method:" << endl;
+        cout << "1. First Fit" << endl;
+        cout << "2. Best Fit" << endl;
+        cout << "3. Worst Fit" << endl;
+        cout << "4. Next Fit" << endl;
+        cout << "5. View Memory" << endl;
+        cout << "6. Exit" << endl;
 
-}
+        int choice;
+        cout << "Enter your choice: ";
+        cin >> choice;
 
-void Memory::firstfit(){
-    
-    for(int i=0;i<bsize;i++){
-        flag[i]=0; //denotes that memory block is free
-    }
-    map<int,int>mp; //blockno and size allocated process
-    map<int,int>::iterator it;
-    for(int i=0;i<psize;i++){
-        for(int j=0;j<bsize;j++){
-            if(process[i]<=blocks[j] && flag[j]==0){
-                mp[j]=process[i];
-                flag[j]=1;
+        switch (choice) {
+            case 1:
+                cout << "First Fit Allocation:" << endl;
+                obj.firstFit();
                 break;
-            }
+            case 2:
+                cout << "Best Fit Allocation:" << endl;
+                obj.bestFit();
+                break;
+            case 3:
+                cout << "Worst Fit Allocation:" << endl;
+                obj.worstFit();
+                break;
+            case 4:
+                cout << "Next Fit Allocation:" << endl;
+                obj.nextFit();
+                break;
+            case 5:
+                cout << "Current Memory Status:" << endl;
+                obj.viewMemory();
+                break;
+            case 6:
+                cout << "Exiting..." << endl;
+                return 0;
+            default:
+                cout << "Invalid choice. Please try again." << endl;
         }
     }
-    cout<<"Block No"<<setw(20)<<"Size of Block"<<setw(30)<<"Size of Process allocated"<<endl;
-    for(it=mp.begin();it!=mp.end();it++){
-        cout<<it->first<<setw(20)<<blocks[it->first]<<setw(20)<<it->second<<endl;
-    }
-}
-void Memory::bestfit(){
-    for(int i=0;i<bsize;i++){
-        flag[i]=0; //denotes that memory block is free
-    }
-    int wastage[bsize];
 
-    map<int,int>mp; //blockno and size allocated process
-    map<int,int>::iterator it;
-    for(int i=0;i<psize;i++){
-        for(int k=0;k<bsize;k++){
-            wastage[k]=0;
-        }
-        for(int j=0;j<bsize;j++){
-            if(process[i]<=blocks[j] && flag[j]==0){
-                wastage[j]=blocks[j]-process[i];
-                // cout<<wastage[j]<<"  ";
-            }
-            else{
-                wastage[j]=9999;
-            }
-        }
-        int min=*min_element(wastage,wastage+bsize);
-        int pos=find(wastage,wastage+bsize,min)-wastage;
-        mp[pos]=process[i];
-        flag[pos]=1;
-
-    }
-    cout<<"Block No"<<setw(20)<<"Size of Block"<<setw(30)<<"Size of Process allocated"<<endl;
-    for(it=mp.begin();it!=mp.end();it++){
-        cout<<it->first<<setw(20)<<blocks[it->first]<<setw(20)<<it->second<<endl;
-    }
-    
-}
-void Memory::worstfit(){
-    for(int i=0;i<bsize;i++){
-        flag[i]=0; //denotes that memory block is free
-    }
-    int wastage[bsize];
-
-    map<int,int>mp; //blockno and size allocated process
-    map<int,int>::iterator it;
-    for(int i=0;i<psize;i++){
-        for(int k=0;k<bsize;k++){
-            wastage[k]=0;
-        }
-        for(int j=0;j<bsize;j++){
-            if(process[i]<=blocks[j] && flag[j]==0){
-                wastage[j]=blocks[j]-process[i];
-                cout<<wastage[j]<<"  ";
-            }
-            else{
-                wastage[j]=0;
-            }
-        }
-        int max=*max_element(wastage,wastage+bsize);
-        int pos=find(wastage,wastage+bsize,max)-wastage;
-        mp[pos]=process[i];
-        flag[pos]=1;
-
-    }
-    cout<<"\nBlock No"<<setw(20)<<"Size of Block"<<setw(30)<<"Size of Process allocated"<<endl;
-    for(it=mp.begin();it!=mp.end();it++){
-        cout<<it->first<<setw(20)<<blocks[it->first]<<setw(20)<<it->second<<endl;
-    }
-    
-}
-int main(){
-    Memory m;
-    m.input();
-    //m.firstfit();
-    //m.bestfit();
-    m.worstfit();
     return 0;
 }
