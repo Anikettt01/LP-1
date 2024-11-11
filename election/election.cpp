@@ -1,151 +1,131 @@
-#include<bits/stdc++.h>
-#include<unistd.h>
+#include <bits/stdc++.h>
 using namespace std;
 
-class candidates{
-    public:
-        int id;
-        bool active;
+class Candidates {
+public:
+    bool active;
+    int id;
 
-        candidates(){
-            id = 0;
-            active = true;
-        }
+    Candidates(int pid) : id(pid), active(true) {}
 
-        void addCandidates(){
-            cout<<"Enter the id of new Candidates: ";
-            cin>>id;
-        }
+    bool isActive() {
+        return active;
+    }
 };
 
-class election{
-    public:
-    vector<candidates>v;
+class BullyElection {
     int currIndex;
+public:
+    vector<Candidates> v;
 
-    void getCandidates(){
-        candidates c;
-        c.addCandidates();
-        v.push_back(c);
+    BullyElection(vector<Candidates>& candidatesList) : v(candidatesList) {}
+
+    void addFailure(int failureId) {
+        if (failureId < v.size()) {
+            v[failureId].active = false;
+            cout << "Candidate " << failureId << " has failed." << endl;
+        }
     }
 
-    // first find max id and its index simply print current co-ordinate then it will fail which will be detected by some index then
-    // deactivate currIndex and then print election initialized
-    void addFailure(){
-        int max=0;
-        // max logic
-        for(int i=0;i<v.size();i++){
-            if(v[i].id > max && v[i].active){
-                max = v[i].id;
-                currIndex = i;
+    void startElection(int initiatorId) {
+        cout << "Election initiated by candidate " << initiatorId << endl;
+        for (int i = initiatorId + 1; i < v.size(); i++) {
+            if (v[i].active) {
+                cout << "Candidate " << i << " receives an election message from " << initiatorId << endl;
             }
         }
-        cout<<"Current co-ordinate is: "<<v[currIndex].id<<endl;
-        sleep(2);
-        cout<<"Current co-ordinate failed";
-        cout<<"Detected by: "<<v[(currIndex-1+v.size())%v.size()].id<<endl;
-        v[currIndex].active = false;
-        sleep(2);
-        cout<<"Election Initialized"<<endl;
+        coordinateElection(initiatorId);
     }
 
-    // Ring algorithm
-    // first store the current in old  then create new i.e previous node run a while loop until new and old becomes same increment by one 
-    // and simply print that message pass from and print current new id after the loop again find the maximum simply copy paste from addFailure
-    void ringAlgorithm(){
-        int old = currIndex;
-        int new1 = (old-1+v.size())%v.size();
-        while(new1!=old){
-            int next = (new1+1)%v.size();
-            if(v[next].active){
-                sleep(2);
-                cout<<"message passed from "<<v[new1].id<<"to "<<v[next].id<<endl;
-            }
-            new1 = next;
-        }
-        int max=0;
-        // max logic
-        for(int i=0;i<v.size();i++){
-            if(v[i].id > max && v[i].active){
-                max = v[i].id;
+    void coordinateElection(int initiatorId) {
+        for (int i = v.size() - 1; i >= initiatorId; i--) {
+            if (v[i].isActive()) {
+                cout << "Candidate " << i << " becomes coordinator" << endl;
                 currIndex = i;
+                announceResult();
+                return;
             }
         }
-        cout<<"New co-ordinate is: "<<v[currIndex].id<<endl;
     }
 
-    // find max elements same from addFailure print current elements then find next element to that kind of same to addFailture
-    // keep one flag false add a loop if [i] element is active and its id is greater than current then pass the message to new id
-    // make flag true after the loop if flag is false then print current id
-    void bullyAlgorithm(){
-        int max=0;
-        for(int i=0;i<v.size();i++){
-            if(v[i].active && v[i].id > max){
-                currIndex = i;
-                max = v[i].id;
+    void announceResult() {
+        for (Candidates c : v) {
+            if (c.isActive() && c.id != currIndex) {
+                cout << "Candidate " << c.id << " acknowledges candidate " << currIndex << " as coordinator" << endl;
             }
-        }
-        cout<<"Current co-ordinate is: "<<v[currIndex].id<<endl;
-        sleep(2);
-        cout<<"Current co-ordinate failed"<<endl;
-
-        int new1 = (currIndex-1+v.size())%v.size();
-        cout<<"Detected by "<<v[new1].id<<endl;
-        v[currIndex].active = false;
-        sleep(2);
-        cout<<"Election initialized"<<endl;
-
-        bool foundCordinate = false;
-        for(int i=new1 ; i != currIndex ; i = (i+1)%v.size()){
-            if(v[i].active && v[i].id > v[currIndex].id){
-                currIndex = i;
-                foundCordinate = true;
-                break;
-            }
-        }
-        if(!foundCordinate){
-            cout<<"co-ordinate is: "<<v[currIndex].id<<endl;
         }
     }
 };
 
-int main(){
-    election e;
-    bool loop = true;
+class RingElection {
+    int currIndex;
+public:
+    vector<Candidates> v;
 
-    while(loop){
-        int n;
-        cout<<"enter the number of candidates: ";
-        cin>>n;
-        for(int i=0;i<n;i++){
-            e.getCandidates();
+    RingElection(vector<Candidates>& candidatesList) : v(candidatesList) {}
+
+    void startElection(int initiatorId) {
+        cout << "Election initiated by candidate " << initiatorId << endl;
+        currIndex = initiatorId;
+
+        int i = (initiatorId + 1) % v.size();
+        while (i != initiatorId) {
+            if (v[i].isActive()) {
+                cout << "Candidate " << i << " receives an election message from " << initiatorId << endl;
+                currIndex = max(currIndex, i);
+            }
+            i = (i + 1) % v.size();
         }
-        cout<<"choose one election algorithm"<<endl;
-        cout<<"1.Ring algorithm"<<endl;
-        cout<<"2.Bully algorithm"<<endl;
-        cout<<"3.exit"<<endl;
+        announceCoordinator();
+    }
 
-        int choice;
-        cin>>choice;
-        
-        switch(choice){
-            case 1:
-            e.addFailure();
-            e.ringAlgorithm();
-            break;
-
-            case 2:
-            e.addFailure();
-            e.bullyAlgorithm();
-            break;
-
-            case 3:
-            loop  = false;
-            break;
-
-            default:
-            cout<<"Invalid choice"<<endl;
+    void announceCoordinator() {
+        cout << "Candidate " << currIndex << " becomes coordinator" << endl;
+        for (Candidates c : v) {
+            if (c.isActive() && c.id != currIndex) {
+                cout << "Candidate " << c.id << " acknowledges candidate " << currIndex << " as coordinator" << endl;
+            }
         }
     }
+};
+
+int main() {
+    int numCandidates;
+    cout << "Enter the number of candidates: ";
+    cin >> numCandidates;
+
+    vector<Candidates> candidatesList;
+    for (int i = 0; i < numCandidates; i++) {
+        candidatesList.push_back(Candidates(i));
+    }
+
+    cout << "Number of candidates: " << candidatesList.size() << endl;
+
+    BullyElection bullyElection(candidatesList);
+
+    int failureId;
+    cout << "Enter the ID of the candidate to fail for the Bully Election: ";
+    cin >> failureId;
+    bullyElection.addFailure(failureId);
+
+    int initiatorId;
+    cout << "Enter the ID of the candidate to initiate the Bully election: ";
+    cin >> initiatorId;
+    bullyElection.startElection(initiatorId);
+
+    cout << "\n------- Ring Election -------\n";
+    RingElection ringElection(candidatesList);
+
+    cout << "Enter the ID of the candidate to fail for the Ring Election: ";
+    cin >> failureId;
+    if (failureId < ringElection.v.size()) {
+        ringElection.v[failureId].active = false;
+        cout << "Candidate " << failureId << " has failed." << endl;
+    }
+
+    cout << "Enter the ID of the candidate to initiate the Ring election: ";
+    cin >> initiatorId;
+    ringElection.startElection(initiatorId);
+
     return 0;
 }
