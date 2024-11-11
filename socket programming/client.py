@@ -1,4 +1,5 @@
 # import socket and threading
+
 # add server ip and port
 
 # create a fucntion for receiving the message use while loop with true condition if message is there then simply print it else connection break

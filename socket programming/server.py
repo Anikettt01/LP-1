@@ -1,4 +1,4 @@
-# import socket and threading1
+# import socket and threading
 
 # add host and port number
 
