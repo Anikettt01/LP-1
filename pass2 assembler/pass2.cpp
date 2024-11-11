@@ -1,3 +1,4 @@
+// working on perfect and simple codes
 #include<bits/stdc++.h>
 using namespace std;
 
