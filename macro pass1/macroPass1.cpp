@@ -80,22 +80,27 @@ public:
         string ins_line = instructions + " ";
         vector<string> parameterReference;
 
-        for (string i : parameters) {
-            auto it = find(PNTAB.begin(), PNTAB.end(), i);
-            int index = (it != PNTAB.end()) ? distance(PNTAB.begin(), it) + 1 : -1;
-            if (index > 3) index -= 3;
-            parameterReference.push_back("(P," + to_string(index) + ")"); // Fixed the space after comma
+        for (string param : parameters) {
+            if (param[0] == '=') {
+                parameterReference.push_back(param); 
+            } else {
+                auto it = find(PNTAB.begin(), PNTAB.end(), param);
+                int index = (it != PNTAB.end()) ? distance(PNTAB.begin(), it) + 1 : -1;
+                if (index > 3) index -= 3;
+                parameterReference.push_back("(P," + to_string(index) + ")");
+            }
         }
         ins_line += join(parameterReference, " ");
         MDT[mdtpCounter++] = ins_line;
     }
+
 
     void processMend() {
         MDT[mdtpCounter++] = "MEND";
     }
 
     void showResult() const {
-        cout << "Sr.No\tName\t#PP\t#KP\tMDTP\tKPDTP\n"; // Fixed column name to KPDTP
+        cout << "Sr.No\tName\t#PP\t#KP\tMDTP\tKPDTP\n";
         for (auto it = MNT.begin(); it != MNT.end(); ++it) {
             int sr_no = it->first;
             auto& entry = it->second;
