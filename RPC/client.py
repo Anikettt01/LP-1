@@ -1,4 +1,4 @@
-# working for localhost do check for remote server
+# localHost
 import xmlrpc.client
 
 # Create an XML-RPC client
