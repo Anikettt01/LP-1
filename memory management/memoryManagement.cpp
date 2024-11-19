@@ -1,3 +1,4 @@
+// first fit, best fit, worst fit, next fit implementation
 #include<bits/stdc++.h>
 using namespace std;
 
