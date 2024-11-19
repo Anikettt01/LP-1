@@ -22,8 +22,6 @@ Welcome to the **LP-1 (Laboratory Practices)** repository! This repository conta
 ---
 
 
----
-
 ## **Contribution Guidelines**
 We highly encourage contributions to improve this repository! Here's how you can contribute:
 1. **Fork the Repository**:
