@@ -1,3 +1,4 @@
+// Ring and bully election algorithm implementation
 #include <bits/stdc++.h>
 using namespace std;
 
