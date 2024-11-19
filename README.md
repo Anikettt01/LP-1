@@ -1,4 +1,4 @@
-# **LP-1: Laboratory Practices**
+# **LP-1: Laboratory Practices - 1**
 
 Welcome to the **LP-1 (Laboratory Practices)** repository! This repository contains solutions to all the assignments given in the **Laboratory Practices** course for the **first semester of the third year**, as per the **Savitribai Phule Pune University (SPPU)** curriculum.
 
