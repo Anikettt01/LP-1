@@ -1,5 +1,4 @@
-// working on mutex and semaphore 
-
+// perfect code 
 #include <iostream>
 #include <algorithm>
 #include <iomanip>
