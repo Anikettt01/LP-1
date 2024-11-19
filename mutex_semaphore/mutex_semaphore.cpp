@@ -1,3 +1,4 @@
+// simple code along with codes 
 #include <iostream>
 #include <thread>
 #include <vector>
