@@ -1,3 +1,4 @@
+
 #include<bits/stdc++.h>
 using namespace std;
 
@@ -55,7 +56,7 @@ public:
             {"#PP", to_string(positional)},
             {"#KP", to_string(keyword)},
             {"MDTP", to_string(mdtpCounter)},
-            {"KPDTP", kpdtp} // Corrected key name
+            {"KPDTP", kpdtp} 
         };
         mntCounter++;
     }
@@ -74,21 +75,17 @@ public:
     void processMDT(string& word) {
         stringstream ss(word);
         string instructions, paramString;
-        ss >> instructions >> paramString;
+        ss >> instructions >> paramString;  
 
         vector<string> parameters = split(paramString, ',');
         string ins_line = instructions + " ";
         vector<string> parameterReference;
 
         for (string param : parameters) {
-            if (param[0] == '=') {
-                parameterReference.push_back(param); 
-            } else {
                 auto it = find(PNTAB.begin(), PNTAB.end(), param);
                 int index = (it != PNTAB.end()) ? distance(PNTAB.begin(), it) + 1 : -1;
                 if (index > 3) index -= 3;
                 parameterReference.push_back("(P," + to_string(index) + ")");
-            }
         }
         ins_line += join(parameterReference, " ");
         MDT[mdtpCounter++] = ins_line;
@@ -130,7 +127,7 @@ private:
         stringstream ss(str);
         string token;
         while (getline(ss, token, delimiter)) {
-            tokens.push_back(token); // Fixed issue: Removed token.push_back(delimiter)
+            tokens.push_back(token);
         }
         return tokens;
     }
